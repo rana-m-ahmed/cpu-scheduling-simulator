@@ -92,7 +92,6 @@ export function computeMetrics(timeline, processes) {
   }
 
   const processCount = safeProcesses.length
-  const completedProcesses = completionOrder.length
 
   return {
     perProcess,

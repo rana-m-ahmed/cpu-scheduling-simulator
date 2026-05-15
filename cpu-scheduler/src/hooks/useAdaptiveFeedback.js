@@ -28,5 +28,5 @@ export function useAdaptiveFeedback() {
       recommendation,
       hasAlerts: starvationAlerts.length > 0,
     }
-  }, [algorithmId, currentTime, playbackIndex, processes, timeline])
+  }, [algorithmId, currentTime, playbackIndex, processes, status, timeline])
 }

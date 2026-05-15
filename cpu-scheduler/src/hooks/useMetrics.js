@@ -57,7 +57,7 @@ export function useMetrics() {
 }
 
 // Development-time sanity warning for metrics
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   const warnIfBad = (m) => {
     if (!m) return
     const checks = [
@@ -70,7 +70,6 @@ if (process.env.NODE_ENV === 'development') {
 
     for (const [name, value] of checks) {
       if (!Number.isFinite(Number(value)) || Number(value) < 0) {
-        // eslint-disable-next-line no-console
         console.warn(`[metrics] Unexpected value for ${name}:`, value)
       }
     }
