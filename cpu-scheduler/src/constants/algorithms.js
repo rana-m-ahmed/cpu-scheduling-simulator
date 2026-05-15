@@ -1,6 +1,8 @@
 /**
  * Registry of CPU scheduling algorithms exposed to the app shell.
  */
+export const MLFQ_LEVEL_ALGORITHM_IDS = ['FCFS', 'SJF', 'SRTF', 'ROUND_ROBIN']
+
 export const ALGORITHM_REGISTRY = [
   {
     id: 'FCFS',
@@ -71,5 +73,6 @@ export const ALGORITHM_REGISTRY = [
     hasAging: true,
     hasLevels: true,
     isPreemptive: true,
+    levelAlgorithmIds: MLFQ_LEVEL_ALGORITHM_IDS,
   },
 ]

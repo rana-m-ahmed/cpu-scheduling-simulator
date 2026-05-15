@@ -83,4 +83,20 @@ console.log('\nTEST E — MLFQ')
 const resE = mlfq(processesE, { levels:3, quantums:[2,4,8] })
 console.log('Timeline length:', resE.timeline.length)
 console.log('CompletionMap:', Object.fromEntries(resE.completionMap))
+
+console.log('\nTEST F — MLFQ mixed per-level policies')
+const processesF = [
+  { pid:1, name:'P1', arrivalTime:0, burstTime:4, remainingTime:4, priority:1 },
+  { pid:2, name:'P2', arrivalTime:0, burstTime:2, remainingTime:2, priority:2 },
+  { pid:3, name:'P3', arrivalTime:0, burstTime:1, remainingTime:1, priority:3 },
+]
+const resF = mlfq(processesF, { levels:2, quantums:[1,2], levelAlgorithms:['SJF', 'FCFS'] })
+const expectedTimelineF = [
+  { pid:3, start:0, end:1 },
+  { pid:2, start:1, end:2 },
+  { pid:1, start:2, end:3 },
+  { pid:2, start:3, end:4 },
+  { pid:1, start:4, end:7 },
+]
+assertEqual(resF.timeline, expectedTimelineF, 'Mixed policy timeline')
 console.log('\nAlgorithm Tests Complete')

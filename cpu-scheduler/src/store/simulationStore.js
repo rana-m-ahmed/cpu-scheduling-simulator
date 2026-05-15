@@ -2,7 +2,7 @@
  * Zustand store for simulation state and playback controls.
  */
 import { create } from 'zustand'
-import { ALGORITHM_REGISTRY } from '../constants/algorithms.js'
+import { ALGORITHM_REGISTRY, MLFQ_LEVEL_ALGORITHM_IDS } from '../constants/algorithms.js'
 import { runScheduler } from '../engine/scheduler.js'
 
 const DEFAULT_PARAMETERS = {
@@ -10,6 +10,39 @@ const DEFAULT_PARAMETERS = {
   agingThreshold: 5,
   mlfqLevels: 3,
   mlfqQuantums: [2, 4, 8],
+  mlfqLevelAlgorithms: ['ROUND_ROBIN', 'ROUND_ROBIN', 'ROUND_ROBIN'],
+}
+
+const DEFAULT_MLFQ_LEVEL_ALGORITHM = 'ROUND_ROBIN'
+
+function normalizeMlfqAlgorithm(algorithm, fallback = DEFAULT_MLFQ_LEVEL_ALGORITHM) {
+  const normalizedAlgorithm = String(algorithm ?? '').toUpperCase()
+
+  return MLFQ_LEVEL_ALGORITHM_IDS.includes(normalizedAlgorithm) ? normalizedAlgorithm : fallback
+}
+
+function normalizeMlfqConfiguration(levels, quantums, levelAlgorithms) {
+  const normalizedLevels = Math.max(1, Number(levels) || 1)
+  const quantumSource = Array.isArray(quantums) && quantums.length > 0 ? quantums : DEFAULT_PARAMETERS.mlfqQuantums
+  const algorithmSource =
+    Array.isArray(levelAlgorithms) && levelAlgorithms.length > 0
+      ? levelAlgorithms
+      : DEFAULT_PARAMETERS.mlfqLevelAlgorithms
+
+  return {
+    mlfqLevels: normalizedLevels,
+    mlfqQuantums: Array.from({ length: normalizedLevels }, (_, index) => {
+      const fallbackQuantum = quantumSource[index] ?? quantumSource[quantumSource.length - 1] ?? 1
+      const normalizedQuantum = Number(quantumSource[index] ?? fallbackQuantum)
+
+      return Math.max(1, Number.isFinite(normalizedQuantum) ? normalizedQuantum : Number(fallbackQuantum) || 1)
+    }),
+    mlfqLevelAlgorithms: Array.from({ length: normalizedLevels }, (_, index) => {
+      const fallbackAlgorithm = algorithmSource[index] ?? algorithmSource[algorithmSource.length - 1] ?? DEFAULT_MLFQ_LEVEL_ALGORITHM
+
+      return normalizeMlfqAlgorithm(algorithmSource[index], normalizeMlfqAlgorithm(fallbackAlgorithm))
+    }),
+  }
 }
 
 const DEFAULT_ALGORITHM_ID = ALGORITHM_REGISTRY[0]?.id ?? 'FCFS'
@@ -43,7 +76,7 @@ export function selectActiveProcessPid(state) {
 /**
  * Create the simulation store.
  *
- * @returns {{algorithmId:string,status:'idle'|'running'|'paused'|'completed',currentTime:number,timeline:Array<object>,playbackIndex:number,speedMs:number,parameters:{quantum:number,agingThreshold:number,mlfqLevels:number,mlfqQuantums:number[]},setAlgorithm:function,setStatus:function,setSpeed:function,updateParameter:function,startSimulation:function,tick:function,pauseSimulation:function,resumeSimulation:function,resetSimulation:function,stepForward:function}} Store state.
+ * @returns {{algorithmId:string,status:'idle'|'running'|'paused'|'completed',currentTime:number,timeline:Array<object>,playbackIndex:number,speedMs:number,parameters:{quantum:number,agingThreshold:number,mlfqLevels:number,mlfqQuantums:number[],mlfqLevelAlgorithms:string[]},setAlgorithm:function,setStatus:function,setSpeed:function,updateParameter:function,startSimulation:function,tick:function,pauseSimulation:function,resumeSimulation:function,resetSimulation:function,stepForward:function}} Store state.
  */
 export const useSimulationStore = create((set, get) => ({
   algorithmId: DEFAULT_ALGORITHM_ID,
@@ -60,7 +93,23 @@ export const useSimulationStore = create((set, get) => ({
   setSpeed: (ms) =>
     set(() => ({ speedMs: Math.max(0, Number(ms) || 0) })),
   updateParameter: (key, value) =>
-    set((state) => ({ parameters: { ...state.parameters, [key]: value } })),
+    set((state) => {
+      const nextParameters = { ...state.parameters, [key]: value }
+
+      if (key === 'mlfqLevels' || key === 'mlfqQuantums' || key === 'mlfqLevelAlgorithms') {
+        const normalized = normalizeMlfqConfiguration(
+          nextParameters.mlfqLevels,
+          nextParameters.mlfqQuantums,
+          nextParameters.mlfqLevelAlgorithms,
+        )
+
+        nextParameters.mlfqLevels = normalized.mlfqLevels
+        nextParameters.mlfqQuantums = normalized.mlfqQuantums
+        nextParameters.mlfqLevelAlgorithms = normalized.mlfqLevelAlgorithms
+      }
+
+      return { parameters: nextParameters }
+    }),
   startSimulation: (processes) => {
     const state = get()
     const { timeline, completionMap } = runScheduler(state.algorithmId, processes, state.parameters)

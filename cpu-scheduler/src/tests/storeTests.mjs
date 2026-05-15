@@ -50,6 +50,21 @@ console.log('\nTEST 2.4 — setAlgorithm')
 log('algorithmId === ROUND_ROBIN', sim.algorithmId === 'ROUND_ROBIN')
 log('status === idle', sim.status === 'idle')
 
+// TEST 2.4b — MLFQ level normalization
+useSimulationStore.getState().setAlgorithm('MLFQ')
+useSimulationStore.getState().updateParameter('mlfqLevels', 4)
+useSimulationStore.getState().updateParameter('mlfqQuantums', [1, 2])
+useSimulationStore.getState().updateParameter('mlfqLevelAlgorithms', ['SJF', 'FCFS'])
+const mlfqParams = useSimulationStore.getState().parameters
+console.log('\nTEST 2.4b — MLFQ normalization')
+log('mlfqLevels === 4', mlfqParams.mlfqLevels === 4)
+log('quantums aligned with levels', mlfqParams.mlfqQuantums.length === 4)
+log('algorithms aligned with levels', mlfqParams.mlfqLevelAlgorithms.length === 4)
+log('existing quantum preserved', mlfqParams.mlfqQuantums[0] === 1)
+log('existing algorithm preserved', mlfqParams.mlfqLevelAlgorithms[0] === 'SJF')
+log('new level quantum has fallback', Number.isFinite(mlfqParams.mlfqQuantums[3]))
+log('new level algorithm defaults safely', typeof mlfqParams.mlfqLevelAlgorithms[3] === 'string')
+
 // Prepare processes for startSimulation
 useProcessStore.getState().clearProcesses()
 useProcessStore.getState().addProcess({ name:'P1', arrivalTime:0, burstTime:2 })
