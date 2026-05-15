@@ -93,10 +93,21 @@ const processesF = [
 const resF = mlfq(processesF, { levels:2, quantums:[1,2], levelAlgorithms:['SJF', 'FCFS'] })
 const expectedTimelineF = [
   { pid:3, start:0, end:1 },
-  { pid:2, start:1, end:2 },
-  { pid:1, start:2, end:3 },
-  { pid:2, start:3, end:4 },
-  { pid:1, start:4, end:7 },
+  { pid:2, start:1, end:3 },
+  { pid:1, start:3, end:7 },
 ]
-assertEqual(resF.timeline, expectedTimelineF, 'Mixed policy timeline')
+assertEqual(resF.timeline, expectedTimelineF, 'SJF-level runs to completion, no quantum-based demotion')
+
+console.log('\nTEST G — MLFQ FCFS-level bypasses quantum')
+const processesG = [
+  { pid:1, name:'P1', arrivalTime:0, burstTime:10, remainingTime:10, priority:1 },
+  { pid:2, name:'P2', arrivalTime:0, burstTime:5, remainingTime:5, priority:2 },
+]
+const resG = mlfq(processesG, { levels:2, quantums:[2,4], levelAlgorithms:['FCFS', 'FCFS'] })
+const expectedTimelineG = [
+  { pid:1, start:0, end:10 },
+  { pid:2, start:10, end:15 },
+]
+assertEqual(resG.timeline, expectedTimelineG, 'FCFS respects no quantum, runs to completion at level')
+
 console.log('\nAlgorithm Tests Complete')

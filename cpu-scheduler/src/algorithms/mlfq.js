@@ -166,14 +166,18 @@ export function mlfq(processes = [], options = { levels: 3, quantums: [2, 4, 8],
     }
 
     if (level < normalizedLevels - 1) {
-      activeProcess.usedQuantum = (activeProcess.usedQuantum ?? 0) + 1
+      const levelAlgorithm = getLevelAlgorithm(level, levelAlgorithms)
 
-      if (activeProcess.usedQuantum >= getQuantumForLevel(level, quantums)) {
-        activeProcess.queueLevel = level + 1
-        activeProcess.usedQuantum = 0
-        queues[activeProcess.queueLevel].push(activeProcess)
-        activeProcess = null
-        continue
+      if (levelAlgorithm === 'ROUND_ROBIN') {
+        activeProcess.usedQuantum = (activeProcess.usedQuantum ?? 0) + 1
+
+        if (activeProcess.usedQuantum >= getQuantumForLevel(level, quantums)) {
+          activeProcess.queueLevel = level + 1
+          activeProcess.usedQuantum = 0
+          queues[activeProcess.queueLevel].push(activeProcess)
+          activeProcess = null
+          continue
+        }
       }
     }
   }

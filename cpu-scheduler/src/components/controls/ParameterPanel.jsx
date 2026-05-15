@@ -85,43 +85,53 @@ export function ParameterPanel() {
             pattern="[0-9]*"
           />
           <div className="grid gap-2">
-            {parameters.mlfqQuantums.map((quantum, index) => (
-              <div key={`mlfq-${index}`} className="grid gap-2 rounded-lg border border-border bg-surface-1 p-3">
-                <ParameterField
-                  label={`Level ${index + 1} Quantum`}
-                  value={quantum}
-                  min={1}
-                  max={20}
-                  onChange={(event) => {
-                    const nextQuantums = [...parameters.mlfqQuantums]
-                    nextQuantums[index] = Number(event.target.value)
-                    updateParameter('mlfqQuantums', nextQuantums)
-                  }}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                />
-                <label className="block space-y-2">
-                  <span className="block font-body text-xs uppercase tracking-wider text-text-muted">
-                    Level {index + 1} Algorithm
-                  </span>
-                  <select
-                    value={parameters.mlfqLevelAlgorithms[index] ?? 'ROUND_ROBIN'}
-                    onChange={(event) => {
-                      const nextAlgorithms = [...parameters.mlfqLevelAlgorithms]
-                      nextAlgorithms[index] = event.target.value
-                      updateParameter('mlfqLevelAlgorithms', nextAlgorithms)
-                    }}
-                    className="w-full rounded border border-border bg-surface-2 px-3 py-2 font-body text-text-primary outline-none transition focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan/20"
-                  >
-                    {levelAlgorithmOptions.map((algorithm) => (
-                      <option key={algorithm.id} value={algorithm.id}>
-                        {algorithm.shortLabel} - {algorithm.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            ))}
+            {parameters.mlfqQuantums.map((quantum, index) => {
+              const levelAlgorithm = parameters.mlfqLevelAlgorithms[index] ?? 'ROUND_ROBIN'
+              const requiresQuantum = levelAlgorithm === 'ROUND_ROBIN'
+              return (
+                <div key={`mlfq-${index}`} className="grid gap-2 rounded-lg border border-border bg-surface-1 p-3">
+                  <label className="block space-y-2">
+                    <span className="block font-body text-xs uppercase tracking-wider text-text-muted">
+                      Level {index + 1} Algorithm
+                    </span>
+                    <select
+                      value={levelAlgorithm}
+                      onChange={(event) => {
+                        const nextAlgorithms = [...parameters.mlfqLevelAlgorithms]
+                        nextAlgorithms[index] = event.target.value
+                        updateParameter('mlfqLevelAlgorithms', nextAlgorithms)
+                      }}
+                      className="w-full rounded border border-border bg-surface-2 px-3 py-2 font-body text-text-primary outline-none transition focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan/20"
+                    >
+                      {levelAlgorithmOptions.map((algorithm) => (
+                        <option key={algorithm.id} value={algorithm.id}>
+                          {algorithm.shortLabel} - {algorithm.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {requiresQuantum ? (
+                    <ParameterField
+                      label={`Level ${index + 1} Quantum`}
+                      value={quantum}
+                      min={1}
+                      max={20}
+                      onChange={(event) => {
+                        const nextQuantums = [...parameters.mlfqQuantums]
+                        nextQuantums[index] = Number(event.target.value)
+                        updateParameter('mlfqQuantums', nextQuantums)
+                      }}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                    />
+                  ) : (
+                    <p className="text-xs text-text-muted italic">
+                      {levelAlgorithm} does not use quantum
+                    </p>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       ) : null}
