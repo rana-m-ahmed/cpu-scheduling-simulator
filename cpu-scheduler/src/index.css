@@ -1,0 +1,87 @@
+/**
+ * Global styles, font imports, and theme variables for the cpu-scheduler app.
+ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-surface: #0d1117;
+  --color-surface-1: #161b22;
+  --color-surface-2: #21262d;
+  --color-surface-3: #30363d;
+  --color-border: #30363d;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-amber: #f59e0b;
+  --color-accent-green: #22c55e;
+  --color-accent-red: #ef4444;
+  --color-accent-purple: #a855f7;
+  --color-text-primary: #e6edf3;
+  --color-text-muted: #8b949e;
+  --color-text-faint: #484f58;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface text-text-primary font-body;
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 30%),
+      radial-gradient(circle at top right, rgba(168, 85, 247, 0.1), transparent 24%),
+      linear-gradient(180deg, rgba(13, 17, 23, 0.98), rgba(13, 17, 23, 1));
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) var(--color-surface);
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border: 2px solid var(--color-surface);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-faint);
+  }
+
+  ::selection {
+    background: rgba(34, 211, 238, 0.18);
+    color: var(--color-text-primary);
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-surface-1/80 border border-border;
+  }
+}
